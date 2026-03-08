@@ -20,8 +20,7 @@ export const apiSlice = createApi({
     "Auth",
     "Event",
     "Ticket",
-   
-
+    "Payment",
   ],
   endpoints: () => ({}),
 });
