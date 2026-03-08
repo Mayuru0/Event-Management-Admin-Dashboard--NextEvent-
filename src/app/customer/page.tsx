@@ -1,42 +1,69 @@
 "use client";
 import React, { useState } from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
+import AllCustomers, { FilterType } from "@/components/Customers/AllCustomers";
+import { useGetAllUsersQuery } from "@/Redux/features/authApiSlice";
+import { useGetTicketsQuery } from "@/Redux/features/ticketApiSlice";
 
-
-import ViewOrgVerified from "@/components/organizers/view_org_verified_view";
-import AllCustomers from "@/components/Customers/AllCustomers";
-;
+const tabs: { label: string; value: FilterType }[] = [
+  { label: "All Customers", value: "all" },
+  { label: "Ticket Bought", value: "bought" },
+  { label: "No Ticket", value: "not_bought" },
+];
 
 const Page = () => {
-  const [activeTab, setActiveTab] = useState("All Customers");
-  const tabs = ["All Customers", "Tickets buy Customers"];
+  const [activeFilter, setActiveFilter] = useState<FilterType>("all");
+
+  const { data: usersData } = useGetAllUsersQuery();
+  const { data: ticketsData } = useGetTicketsQuery();
+
+  const allCustomers = Array.isArray(usersData)
+    ? usersData.filter((u) => u.role === "customer")
+    : [];
+  const buyerIds = new Set(
+    Array.isArray(ticketsData) ? ticketsData.map((t) => t.userId) : []
+  );
+
+  const counts: Record<FilterType, number> = {
+    all: allCustomers.length,
+    bought: allCustomers.filter((c) => buyerIds.has(c._id)).length,
+    not_bought: allCustomers.filter((c) => !buyerIds.has(c._id)).length,
+  };
 
   return (
     <DefaultLayout>
       <div>
-        {/* Header */}
         <h2 className="text-3xl font-bold text-[#0065AD]">Customers</h2>
 
-        {/* Tabs */}
-        <div className="flex mt-4 bg-white p-2 rounded-lg shadow-md w-max">
-          {tabs.map((tab) => (
+        {/* Filter Tabs */}
+        <div className="flex mt-4 bg-white p-2 rounded-lg shadow-md w-max gap-1">
+          {tabs.map(({ label, value }) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                activeTab === tab ? "bg-blue-600 text-white" : "text-gray-600"
+              key={value}
+              onClick={() => setActiveFilter(value)}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                activeFilter === value
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
             >
-              {tab}
+              {label}
+              <span
+                className={`ml-1.5 rounded-full px-1.5 py-0.5 text-xs ${
+                  activeFilter === value
+                    ? "bg-white/20 text-white"
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                {counts[value]}
+              </span>
             </button>
           ))}
         </div>
 
-        {/* Dynamic Component Rendering */}
+        {/* Dynamic Component Render */}
         <div className="mt-4">
-          {activeTab === "All Customers" && <AllCustomers />}
-          {activeTab === "Tickets buy Customers" && <ViewOrgVerified />}
-          
+          <AllCustomers filter={activeFilter} />
         </div>
       </div>
     </DefaultLayout>

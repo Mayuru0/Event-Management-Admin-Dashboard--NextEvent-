@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { LayoutGridIcon, LucideHome, LucideUsers } from "lucide-react";
+import { LayoutGridIcon, LucideHome, LucideUsers, TicketIcon } from "lucide-react";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -43,6 +43,13 @@ const menuGroups = [
         ),
         label: "Customers",
         route: "/customer",
+      },
+      {
+        icon: (
+          <TicketIcon />
+        ),
+        label: "Tickets",
+        route: "/tickets",
       },
     ],
   },
