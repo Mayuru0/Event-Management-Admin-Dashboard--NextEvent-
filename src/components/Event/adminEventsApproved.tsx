@@ -4,12 +4,10 @@ import { useGetAllEventsQuery } from "@/Redux/features/eventApiSlice";
 import { Event } from "@/type/EventType";
 import { useGetUserQuery } from "@/Redux/features/authApiSlice";
 
-
 // Define the prop types for AdminEventsPending
 interface AdminEventsPendingProps {
   onView: (event: Event) => void;
 }
-
 
 // Separate component to fetch and display user info
 const UserInfo: React.FC<{ organizerId: string | undefined }> = ({ organizerId }) => {
@@ -31,50 +29,50 @@ const UserInfo: React.FC<{ organizerId: string | undefined }> = ({ organizerId }
   );
 };
 
-
-// Rename the component to avoid conflict
-const adminEventsApproved: React.FC<AdminEventsPendingProps> = ({ onView }) => {
+// ✅ Corrected component name (uppercase)
+const AdminEventsApproved: React.FC<AdminEventsPendingProps> = ({ onView }) => {
   const { data, isLoading, isError } = useGetAllEventsQuery();
- 
-   const filteredEvents: Event[] = Array.isArray(data)
-     ? data.filter((event) => event.status === "Published")
-     : [];
- 
-   // Pagination states
-   const [currentPage, setCurrentPage] = useState(1);
-   const eventsPerPage = 5;
-   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
-   const startIndex = (currentPage - 1) * eventsPerPage;
-   const endIndex = startIndex + eventsPerPage;
-   const currentEvents = filteredEvents.slice(startIndex, endIndex);
- 
-   const handleNextPage = () => {
-     if (currentPage < totalPages) {
-       setCurrentPage((prev) => prev + 1);
-     }
-   };
- 
-   const handlePrevPage = () => {
-     if (currentPage > 1) {
-       setCurrentPage((prev) => prev - 1);
-     }
-   };
- 
-   if (isLoading) {
-     return (
-       <p className="text-center text-xl font-semibold text-blue-600">
-         Loading events...
-       </p>
-     );
-   }
- 
-   if (isError) {
-     return (
-       <p className="text-center text-lg font-semibold text-red-500">
-         Failed to load events.
-       </p>
-     );
-   }
+
+  const filteredEvents: Event[] = Array.isArray(data)
+    ? data.filter((event) => event.status === "Published")
+    : [];
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const eventsPerPage = 5;
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  const startIndex = (currentPage - 1) * eventsPerPage;
+  const endIndex = startIndex + eventsPerPage;
+  const currentEvents = filteredEvents.slice(startIndex, endIndex);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <p className="text-center text-xl font-semibold text-blue-600">
+        Loading events...
+      </p>
+    );
+  }
+
+  if (isError) {
+    return (
+      <p className="text-center text-lg font-semibold text-red-500">
+        Failed to load events.
+      </p>
+    );
+  }
+
   return (
     <div className="min-h-screen p-6">
       {/* Table */}
@@ -95,7 +93,7 @@ const adminEventsApproved: React.FC<AdminEventsPendingProps> = ({ onView }) => {
             </tr>
           </thead>
           <tbody>
-          {currentEvents.map((event) => (
+            {currentEvents.map((event) => (
               <tr key={event._id} className="border-b border-gray-300">
                 <td className="p-3 text-[#1F1F1F]">{event.title}</td>
                 <td className="p-3 text-[#1F1F1F]">{event.event_type}</td>
@@ -105,9 +103,7 @@ const adminEventsApproved: React.FC<AdminEventsPendingProps> = ({ onView }) => {
                 <td className="p-3 text-[#1F1F1F]">{event.location}</td>
                 <td className="p-3 text-[#1F1F1F]">{event.quantity}</td>
                 <td className="p-3 text-[#1F1F1F]">
-                  {event.date
-                    ? new Date(event.date).toLocaleDateString()
-                    : "N/A"}
+                  {event.date ? new Date(event.date).toLocaleDateString() : "N/A"}
                 </td>
                 <td className="p-3">
                   <button
@@ -130,7 +126,11 @@ const adminEventsApproved: React.FC<AdminEventsPendingProps> = ({ onView }) => {
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 1}
-              className={`rounded-md px-4 py-2 ${currentPage === 1 ? "cursor-not-allowed bg-gray-300" : "bg-blue-500 text-white"}`}
+              className={`rounded-md px-4 py-2 ${
+                currentPage === 1
+                  ? "cursor-not-allowed bg-gray-300"
+                  : "bg-blue-500 text-white"
+              }`}
             >
               Previous
             </button>
@@ -140,7 +140,11 @@ const adminEventsApproved: React.FC<AdminEventsPendingProps> = ({ onView }) => {
             <button
               onClick={handleNextPage}
               disabled={currentPage === totalPages}
-              className={`rounded-md px-4 py-2 ${currentPage === totalPages ? "cursor-not-allowed bg-gray-300" : "bg-blue-500 text-white"}`}
+              className={`rounded-md px-4 py-2 ${
+                currentPage === totalPages
+                  ? "cursor-not-allowed bg-gray-300"
+                  : "bg-blue-500 text-white"
+              }`}
             >
               Next
             </button>
@@ -151,4 +155,4 @@ const adminEventsApproved: React.FC<AdminEventsPendingProps> = ({ onView }) => {
   );
 };
 
-export default adminEventsApproved;
+export default AdminEventsApproved;

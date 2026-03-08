@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Event } from "@/type/EventType";
 import { useUpdateEventStatusMutation, useDeleteEventMutation } from "@/Redux/features/eventApiSlice";
 import Swal from "sweetalert2";
+import Image from "next/image";
 
 interface EventsApprovedViewProps {
   event: Event | null;
@@ -81,7 +82,10 @@ const EventsApprovedView: React.FC<EventsApprovedViewProps> = ({ event, onClose 
       {/* Event Image */}
       <div className="mt-2 flex h-[160px] w-[476px] items-center justify-center overflow-hidden rounded-lg bg-gray-100">
         {event.image ? (
-          <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
+          <Image
+            height={160}
+            width={476}
+            src={event.image} alt={event.title} className="h-full w-full object-cover" />
         ) : (
           <span className="text-gray-400 text-sm">No image</span>
         )}

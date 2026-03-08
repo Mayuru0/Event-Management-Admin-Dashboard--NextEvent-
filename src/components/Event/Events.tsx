@@ -49,9 +49,9 @@ const Events = () => {
     if (activeTab === "Active") {
       return <EventsApprovedView event={selectedEvent} onClose={() => setSelectedEvent(null)} />;
     }
-    if (activeTab === "Archived") {
-      return <EventsSouldoutView event={selectedEvent} />;
-    }
+    // if (activeTab === "Archived") {
+    //   return <EventsSouldoutView event={selectedEvent} />;
+    // }
     if (activeTab === "Rejected") {
       return <EventsRejectedView event={selectedEvent} onClose={() => setSelectedEvent(null)} />;
     }
