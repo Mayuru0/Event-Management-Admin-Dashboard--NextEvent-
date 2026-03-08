@@ -3,6 +3,8 @@ import Image from "next/image";
 import { useGetAllEventsQuery } from "@/Redux/features/eventApiSlice";
 import { Event } from "@/type/EventType";
 import { useGetUserQuery } from "@/Redux/features/authApiSlice";
+import { useUpdateEventStatusMutation, useDeleteEventMutation } from "@/Redux/features/eventApiSlice";
+import Swal from "sweetalert2";
 
 // Define the prop types for AdminEventsSoldout
 interface AdminEventsSoldoutProps {
@@ -32,9 +34,11 @@ const UserInfo: React.FC<{ organizerId: string | undefined }> = ({ organizerId }
 
 const AdminEventsSoldout: React.FC<AdminEventsSoldoutProps> = ({ onView }) => {
   const { data, isLoading, isError } = useGetAllEventsQuery();
+  const [updateEventStatus] = useUpdateEventStatusMutation();
+  const [deleteEvent] = useDeleteEventMutation();
 
   const filteredEvents: Event[] = Array.isArray(data)
-    ? data.filter((event) => event.status === "Sold-Out") // Fix: We should filter for "Sold-Out" status here
+    ? data.filter((event) => event.status === "Archived") // archived/sold-out
     : [];
 
   // Pagination states
@@ -117,15 +121,58 @@ const AdminEventsSoldout: React.FC<AdminEventsSoldoutProps> = ({ onView }) => {
                     {event.status}
                   </span>
                 </td>
-                <td className="p-3 text-[#1F1F1F]">
+                <td className="p-3 text-[#1F1F1F] flex gap-2">
                   <button
-                    onClick={() => onView(event)} // ✅ Now calls the function correctly
+                    onClick={() => onView(event)}
                     className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-1 text-white"
                   >
-                    View{" "}
-                    <span role="img" aria-label="eye">
-                      👁️
-                    </span>
+                    View <span role="img" aria-label="eye">👁️</span>
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const result = await Swal.fire({
+                        title: "Restore Event?",
+                        text: `Move \"${event.title}\" back to Published?`,
+                        icon: "question",
+                        showCancelButton: true,
+                        confirmButtonColor: "#0065AD",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Yes, Restore",
+                      });
+                      if (!result.isConfirmed) return;
+                      try {
+                        await updateEventStatus({ eventId: event._id, status: "Published" }).unwrap();
+                        Swal.fire({ title: "Restored!", icon: "success", confirmButtonText: "OK" });
+                      } catch {
+                        Swal.fire({ title: "Error!", text: "Failed to restore event.", icon: "error" });
+                      }
+                    }}
+                    className="rounded-md bg-green-600 px-3 py-1 text-white"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const result = await Swal.fire({
+                        title: "Reject Event?",
+                        text: `Mark \"${event.title}\" as Rejected?`,
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#dc2626",
+                        cancelButtonColor: "#6b7280",
+                        confirmButtonText: "Yes, Reject",
+                      });
+                      if (!result.isConfirmed) return;
+                      try {
+                        await updateEventStatus({ eventId: event._id, status: "Rejected" }).unwrap();
+                        Swal.fire({ title: "Rejected!", icon: "success", confirmButtonText: "OK" });
+                      } catch {
+                        Swal.fire({ title: "Error!", text: "Failed to reject event.", icon: "error" });
+                      }
+                    }}
+                    className="rounded-md bg-red-600 px-3 py-1 text-white"
+                  >
+                    Reject
                   </button>
                 </td>
               </tr>

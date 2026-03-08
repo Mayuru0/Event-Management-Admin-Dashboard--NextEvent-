@@ -2,19 +2,13 @@
 import { Calendar, MapPin, X } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
+import { useUpdateEventStatusMutation, useDeleteEventMutation } from "@/Redux/features/eventApiSlice";
+import Swal from "sweetalert2";
 
-// Define the type for the event
-interface Event {
-  id: number;
-  title: string;
-  date: string;
-  location: string;
-  tickets: number;
-  description?: string;
-  price?: number;
-  quantity?: number;
-  images?: string[];
-}
+// use shared Event type from central definitions
+import { Event } from "@/type/EventType";
+
+// (local variations like tickets/price are derived from the shared structure)
 
 const products = [
   { title: "VIP", price: "$99", qty: "x50" },
@@ -22,14 +16,17 @@ const products = [
   { title: "Basic", price: "$49", qty: "x100" },
 ];
 
-// Define the prop types for EventsPendingView
-interface EventsPendingViewProps {
+// Define the prop types for the sold‑out panel (renamed and include onClose)
+interface EventsSouldoutViewProps {
   event: Event | null; // event can either be an Event or null
+  onClose: () => void;
 }
 
-const EventsSouldoutView: React.FC<EventsPendingViewProps> = ({ event }) => {
+const EventsSouldoutView: React.FC<EventsSouldoutViewProps> = ({ event, onClose }) => {
   const [formData, setFormData] = useState<Event | null>(event); // Ensure formData is either Event or null
   const [isVisible, setIsVisible] = useState(false);
+  const [updateEventStatus] = useUpdateEventStatusMutation();
+  const [deleteEvent] = useDeleteEventMutation();
 
   useEffect(() => {
     if (event) {
@@ -40,6 +37,51 @@ const EventsSouldoutView: React.FC<EventsPendingViewProps> = ({ event }) => {
 
   // Check if formData is valid before accessing its properties
   if (!isVisible || !formData) return null;
+
+  const handleClose = () => {
+    setIsVisible(false);
+    onClose();
+  };
+
+  const handleApprove = async () => {
+    const result = await Swal.fire({
+      title: "Restore Event?",
+      text: `Move "${formData?.title}" back to Published?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#0065AD",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, Restore",
+    });
+    if (!result.isConfirmed || !formData) return;
+    try {
+      await updateEventStatus({ eventId: formData._id, status: "Published" }).unwrap();
+      Swal.fire({ title: "Restored!", icon: "success", confirmButtonText: "OK" });
+      handleClose();
+    } catch {
+      Swal.fire({ title: "Error!", text: "Failed to restore event.", icon: "error" });
+    }
+  };
+
+  const handleReject = async () => {
+    const result = await Swal.fire({
+      title: "Reject Archived Event?",
+      text: `Mark "${formData?.title}" as Rejected?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, Reject",
+    });
+    if (!result.isConfirmed || !formData) return;
+    try {
+      await updateEventStatus({ eventId: formData._id, status: "Rejected" }).unwrap();
+      Swal.fire({ title: "Rejected!", icon: "success", confirmButtonText: "OK" });
+      handleClose();
+    } catch {
+      Swal.fire({ title: "Error!", text: "Failed to reject event.", icon: "error" });
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -68,7 +110,7 @@ const EventsSouldoutView: React.FC<EventsPendingViewProps> = ({ event }) => {
         </div>
         <button
           className="flex items-center justify-center gap-1 text-3xl font-medium text-[#1F1F1F]"
-          onClick={() => setIsVisible(false)}
+          onClick={handleClose}
         >
           X
         </button>
@@ -136,7 +178,7 @@ const EventsSouldoutView: React.FC<EventsPendingViewProps> = ({ event }) => {
             <input
               type="number"
               className="h-14 w-[250px] rounded border-[1px] border-black bg-transparent p-2 text-[#888888]"
-              value={formData.price}
+              value={formData.ticket_price}
               onChange={handleChange}
             />
             <h4 className="font-kulim text-lg font-normal">X</h4>
@@ -182,29 +224,38 @@ const EventsSouldoutView: React.FC<EventsPendingViewProps> = ({ event }) => {
         <div className="flex w-[476px] flex-col gap-[5px]">
           <h4 className="w-[476px] text-lg font-normal">Gallery</h4>
           <div className="flex flex-wrap gap-1 rounded-md border-2 border-dashed border-[#888888] p-4">
-            {formData.images &&
-              formData.images.length > 0 &&
-              formData.images.map((image, index) => (
-                <div
-                  key={index}
-                  className="relative my-2 ml-6 h-[110px] w-[111px]"
-                >
-                  <Image
-                    src={image}
-                    alt={`Gallery Image ${index + 1}`}
-                    className="h-full w-full object-cover"
-                    width={111}
-                    height={110}
-                  />
-                </div>
-              ))}
+            {formData.image && (
+              <div className="relative my-2 ml-6 h-[110px] w-[111px]">
+                <Image
+                  src={formData.image}
+                  alt="Event Image"
+                  className="h-full w-full object-cover"
+                  width={111}
+                  height={110}
+                />
+              </div>
+            )}
           </div>
         </div>
 
         <div className="flex w-[476px] gap-4 font-raleway">
           <button
-            onClick={() => setIsVisible(false)}
-            type="submit"
+            onClick={handleApprove}
+            type="button"
+            className="flex-1 rounded-md bg-green-600 py-2 text-lg font-bold text-white hover:bg-green-700"
+          >
+            Restore
+          </button>
+          <button
+            onClick={handleReject}
+            type="button"
+            className="flex-1 rounded-md bg-red-600 py-2 text-lg font-bold text-white hover:bg-red-700"
+          >
+            Reject
+          </button>
+          <button
+            onClick={handleClose}
+            type="button"
             className="flex-1 rounded-md bg-[#0065AD] py-2 text-lg font-bold text-white hover:bg-[#0066AD]"
           >
             Close

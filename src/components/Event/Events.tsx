@@ -34,7 +34,7 @@ const Events = () => {
       case "Rejected":
         return <AdminEventsRejected onView={handleViewEvent} />;
       case "Archived":
-        return <AdminEventsRejected onView={handleViewEvent} />;
+        return <AdminEventsSoldout onView={handleViewEvent} />;
       default:
         return null;
     }
@@ -49,11 +49,11 @@ const Events = () => {
     if (activeTab === "Active") {
       return <EventsApprovedView event={selectedEvent} onClose={() => setSelectedEvent(null)} />;
     }
-    // if (activeTab === "Archived") {
-    //   return <EventsSouldoutView event={selectedEvent} />;
-    // }
     if (activeTab === "Rejected") {
-      return <EventsRejectedView event={selectedEvent} onClose={() => setSelectedEvent(null)} />;
+      return <EventsRejectedView event={selectedEvent}  onClose={() => setSelectedEvent(null)} />;
+    }
+    if (activeTab === "Archived") {
+      return <EventsSouldoutView event={selectedEvent} onClose={() => setSelectedEvent(null)} />;
     }
     return null;
   };
