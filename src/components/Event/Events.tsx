@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { Event } from "@/type/EventType";
 import AdminEventsApproved from "./adminEventsApproved";
 import AdminEventsPending from "./adminEventsPending";
 import AdminEventsRejected from "./adminEventsRejected";
@@ -9,22 +10,11 @@ import EventsApprovedView from "./RightSidePanel/EventsApprovedView";
 import EventsSouldoutView from "./RightSidePanel/EventsSouldoutView";
 import EventsRejectedView from "./RightSidePanel/EventsRejectedView";
 
-// Define the type for the event
-interface Event {
-  id: number;
-  title: string;
-  type: string;
-  organizer: string;
-  location: string;
-  tickets: number;
-  date: string;
-}
-
 const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [activeTab, setActiveTab] = useState("Pending");
+  const [activeTab, setActiveTab] = useState("Active");
 
-  const tabs = ["Pending", "Active", "Sold Out", "Rejected"];
+  const tabs = ["Active", "Pending", "Rejected", "Archived"];
 
   const handleViewEvent = (event: Event) => {
     setSelectedEvent(event);
@@ -37,13 +27,13 @@ const Events = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "Pending":
-        return <AdminEventsPending onView={handleViewEvent} />;
       case "Active":
         return <AdminEventsApproved onView={handleViewEvent} />;
-      case "Sold Out":
-        return <AdminEventsSoldout onView={handleViewEvent} />;
+      case "Pending":
+        return <AdminEventsPending onView={handleViewEvent} />;
       case "Rejected":
+        return <AdminEventsRejected onView={handleViewEvent} />;
+      case "Archived":
         return <AdminEventsRejected onView={handleViewEvent} />;
       default:
         return null;
@@ -54,26 +44,24 @@ const Events = () => {
     if (!selectedEvent) return null;
 
     if (activeTab === "Pending") {
-      return <EventPendingSidePannel event={selectedEvent} />;
+      return <EventPendingSidePannel event={selectedEvent} onClose={() => setSelectedEvent(null)} />;
     }
     if (activeTab === "Active") {
-      return <EventsApprovedView event={selectedEvent} />;
+      return <EventsApprovedView event={selectedEvent} onClose={() => setSelectedEvent(null)} />;
     }
-    if (activeTab === "Sold Out") {
+    if (activeTab === "Archived") {
       return <EventsSouldoutView event={selectedEvent} />;
     }
     if (activeTab === "Rejected") {
-      return <EventsRejectedView event={selectedEvent} />;
+      return <EventsRejectedView event={selectedEvent} onClose={() => setSelectedEvent(null)} />;
     }
     return null;
   };
 
   return (
-    <div>
+    <div className="relative">
       {/* Sidebar */}
-      <div className="absolute right-[-2.5rem] top-[-2.5rem]">
-        {sidePannel()}
-      </div>
+      {sidePannel()}
 
       <h2 className="text-3xl font-bold text-[#0065AD]">Events</h2>
 
