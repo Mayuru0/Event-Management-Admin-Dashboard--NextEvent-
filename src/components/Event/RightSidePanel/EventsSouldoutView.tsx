@@ -189,7 +189,7 @@ const EventsSouldoutView: React.FC<EventsPendingViewProps> = ({ event }) => {
                   key={index}
                   className="relative my-2 ml-6 h-[110px] w-[111px]"
                 >
-                  <img
+                  <Image
                     src={image}
                     alt={`Gallery Image ${index + 1}`}
                     className="h-full w-full object-cover"

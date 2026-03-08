@@ -9,6 +9,6 @@ export interface TicketType {
     event_type: string;
     location: string;
     quantity: number;
-    status:string;
-    
+    status: string;
+    stripeSessionId?: string;
   }

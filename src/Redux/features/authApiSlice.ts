@@ -65,12 +65,18 @@ export const authApiSlice = apiSlice.injectEndpoints({
 
 
 getUser: builder.query<User, string>({
-  query: (userId) => `/user/${userId}`, 
+  query: (userId) => `/user/${userId}`,
   transformResponse: (response: { success: boolean; data: User }) => response.data,
   providesTags: ["Auth"],
-})
+}),
 
-    
+deleteUser: builder.mutation<void, string>({
+  query: (UserId) => ({
+    url: `/user/delete/${UserId}`,
+    method: "DELETE",
+  }),
+  invalidatesTags: ["Auth"],
+}),
 
   }),
  
@@ -81,4 +87,4 @@ getUser: builder.query<User, string>({
 
 })
 
-export const { useRegisterMutation, useLoginMutation, useUpdateUserMutation , useGetAllUsersQuery ,useUpdateUserStatusMutation ,useGetUserQuery} = authApiSlice
+export const { useRegisterMutation, useLoginMutation, useUpdateUserMutation , useGetAllUsersQuery ,useUpdateUserStatusMutation ,useGetUserQuery, useDeleteUserMutation } = authApiSlice

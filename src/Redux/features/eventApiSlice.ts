@@ -43,6 +43,15 @@ export const eventApiSlice = apiSlice.injectEndpoints({
       query: (organizerId) => `/event/${organizerId}`,
       providesTags: ["Event"],
     }),
+
+    updateEventStatus: builder.mutation<Event, { eventId: string; status: string }>({
+      query: ({ eventId, status }) => ({
+        url: `/event/status/${eventId}`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Event"],
+    }),
   }),
 });
 
@@ -53,4 +62,5 @@ export const {
   useUpdateEventMutation,
   useDeleteEventMutation,
   useGetEventsByOrganizeridQuery,
+  useUpdateEventStatusMutation,
 } = eventApiSlice;
