@@ -37,7 +37,7 @@ const adminEventsRejected: React.FC<AdminEventsPendingProps> = ({ onView }) => {
    const { data, isLoading, isError } = useGetAllEventsQuery();
   
     const filteredEvents: Event[] = Array.isArray(data)
-      ? data.filter((event) => event.status === "Pending")
+      ? data.filter((event) => event.status === "Rejected")
       : [];
   
     // Pagination states
